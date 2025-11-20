@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Third-Eye - Agentic AI Platform</title>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar" [class.collapsed]="sidebarCollapsed()">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <div class="eye-animation" [class.blink]="eyeBlinking()">
+                        👁️
+                    </div>
+                </div>
+                <div class="logo-text" [class.hidden]="sidebarCollapsed()">
+                    <h2>Third-Eye</h2>
+                    <span>Agentic AI Platform</span>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="nav-menu">
+                <div class="nav-item" 
+                     [class.active]="currentRoute() === 'dashboard'"
+                     (click)="navigateTo('dashboard')"
+                     title="Dashboard">
+                    <i class="icon">📊</i>
+                    <span [class.hidden]="sidebarCollapsed()">Dashboard</span>
+                </div>
+
+                <div class="nav-item" 
+                     [class.active]="currentRoute() === 'agents'"
+                     (click)="navigateTo('agents')"
+                     title="AI Agents">
+                    <i class="icon">🤖</i>
+                    <span [class.hidden]="sidebarCollapsed()">AI Agents</span>
+                </div>
+
+                <div class="nav-item" 
+                     [class.active]="currentRoute() === 'library'"
+                     (click)="navigateTo('library')"
+                     title="Library">
+                    <i class="icon">📚</i>
+                    <span [class.hidden]="sidebarCollapsed()">Library</span>
+                </div>
+
+                <div class="nav-item" 
+                     [class.active]="currentRoute() === 'conversations'"
+                     (click)="navigateTo('conversations')"
+                     title="Conversations">
+                    <i class="icon">💬</i>
+                    <span [class.hidden]="sidebarCollapsed()">Conversations</span>
+                </div>
+
+                <div class="nav-item" 
+                     [class.active]="currentRoute() === 'integrations'"
+                     (click)="navigateTo('integrations')"
+                     title="Integrations">
+                    <i class="icon">🔗</i>
+                    <span [class.hidden]="sidebarCollapsed()">Integrations</span>
+                    <span class="beta-badge" [class.hidden]="sidebarCollapsed()">Beta</span>
+                </div>
+
+                <div class="nav-item" 
+                     [class.active]="currentRoute() === 'bedrock'"
+                     (click)="navigateTo('bedrock')"
+                     title="AWS Bedrock">
+                    <i class="icon">☁️</i>
+                    <span [class.hidden]="sidebarCollapsed()">AWS Bedrock</span>
+                </div>
+
+                <div class="nav-item" 
+                     [class.active]="currentRoute() === 'analytics'"
+                     (click)="navigateTo('analytics')"
+                     title="Analytics">
+                    <i class="icon">📈</i>
+                    <span [class.hidden]="sidebarCollapsed()">Analytics</span>
+                </div>
+            </nav>
+
+            <!-- Account Section -->
+            <div class="account-section">
+                <div class="nav-item" 
+                     [class.active]="currentRoute() === 'account'"
+                     (click)="navigateTo('account')"
+                     title="Account">
+                    <i class="icon">👤</i>
+                    <span [class.hidden]="sidebarCollapsed()">Account</span>
+                </div>
+                
+                <div class="nav-item logout" (click)="logout()" title="Logout">
+                    <i class="icon">🚪</i>
+                    <span [class.hidden]="sidebarCollapsed()">Logout</span>
+                </div>
+            </div>
+
+            <!-- Collapse Toggle -->
+            <div class="collapse-toggle" (click)="toggleSidebar()">
+                <i class="icon">{{ sidebarCollapsed() ? '▶️' : '◀️' }}</i>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" [class.expanded]="sidebarCollapsed()">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" (click)="toggleSidebar()">
+                        <i class="icon">☰</i>
+                    </button>
+                    <h1>{{ getPageTitle() }}</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="Search..." [(ngModel)]="searchQuery">
+                        <i class="search-icon">🔍</i>
+                    </div>
+                    
+                    <div class="user-profile" (click)="toggleAuthDemo()">
+                        <div class="user-avatar">{{ getUserInitials() }}</div>
+                        <span class="user-name">{{ currentUser()?.email }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Router Outlet -->
+            <main class="content-area">
+                <router-outlet></router-outlet>
+            </main>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="login-overlay" *ngIf="!isAuthenticated()" (click)="closeLoginModal($event)">
+        <div class="login-modal" (click)="$event.stopPropagation()">
+            <div class="login-header">
+                <div class="login-logo">
+                    <div class="eye-animation blink">👁️</div>
+                    <h2>Third-Eye</h2>
+                </div>
+                <p>Enter your credentials to access the Agentic AI Platform</p>
+            </div>
+
+            <form class="login-form" (ngSubmit)="login()">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        [(ngModel)]="loginForm.email" 
+                        name="email"
+                        placeholder="Enter your email"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="apiKey">API Key</label>
+                    <input 
+                        type="password" 
+                        id="apiKey" 
+                        [(ngModel)]="loginForm.apiKey" 
+                        name="apiKey"
+                        placeholder="Enter your API key"
+                        required>
+                </div>
+
+                <button type="submit" class="login-btn" [disabled]="!loginForm.email || !loginForm.apiKey">
+                    Sign In
+                </button>
+
+                <div class="login-help">
+                    <p>Need an API key? Contact your administrator.</p>
+      </div>
+            </form>
+      </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,129 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "/tmp"],
+      "description": "File system operations server",
+      "capabilities": ["file_read", "file_write", "directory_list", "file_search"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "git": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-git", "--repository", "."],
+      "description": "Git repository operations",
+      "capabilities": ["git_log", "git_diff", "git_status", "git_commit"],
+      "env": {}
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-brave-search"],
+      "description": "Web search using Brave Search API",
+      "capabilities": ["web_search", "news_search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    },
+    "postgres": {
+      "command": "npx", 
+      "args": ["@modelcontextprotocol/server-postgres"],
+      "description": "PostgreSQL database operations",
+      "capabilities": ["sql_query", "schema_inspect", "table_list"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "${POSTGRES_CONNECTION_STRING}"
+      }
+    },
+    "sqlite": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-sqlite", "--db-path", "./data/app.db"],
+      "description": "SQLite database operations",
+      "capabilities": ["sql_query", "schema_inspect", "table_create"],
+      "env": {}
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-puppeteer"],
+      "description": "Web scraping and browser automation",
+      "capabilities": ["page_screenshot", "page_content", "element_click"],
+      "env": {}
+    },
+    "slack": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-slack"],
+      "description": "Slack workspace integration",
+      "capabilities": ["send_message", "list_channels", "get_users"],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-github"],
+      "description": "GitHub repository management",
+      "capabilities": ["create_repo", "list_issues", "create_pr"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-memory"],
+      "description": "Persistent memory and knowledge base",
+      "capabilities": ["store_memory", "retrieve_memory", "search_memory"],
+      "env": {}
+    },
+    "time": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-time"],
+      "description": "Date and time operations",
+      "capabilities": ["current_time", "timezone_convert", "date_format"],
+      "env": {}
+    },
+    "weather": {
+      "command": "python",
+      "args": ["-m", "mcp_servers.weather"],
+      "description": "Weather information and forecasts",
+      "capabilities": ["current_weather", "weather_forecast", "weather_alerts"],
+      "env": {
+        "OPENWEATHER_API_KEY": "${OPENWEATHER_API_KEY}"
+      }
+    },
+    "calculator": {
+      "command": "python",
+      "args": ["-m", "mcp_servers.calculator"],
+      "description": "Mathematical calculations and expressions",
+      "capabilities": ["calculate", "solve_equation", "plot_function"],
+      "env": {}
+    },
+    "email": {
+      "command": "python",
+      "args": ["-m", "mcp_servers.email"],
+      "description": "Email sending and management",
+      "capabilities": ["send_email", "list_emails", "search_emails"],
+      "env": {
+        "SMTP_SERVER": "${SMTP_SERVER}",
+        "SMTP_PORT": "${SMTP_PORT}",
+        "EMAIL_USER": "${EMAIL_USER}",
+        "EMAIL_PASSWORD": "${EMAIL_PASSWORD}"
+      }
+    }
+  },
+  "defaults": {
+    "timeout": 30000,
+    "retries": 3,
+    "logLevel": "info"
+  },
+  "security": {
+    "allowedCommands": [
+      "npx",
+      "python",
+      "node"
+    ],
+    "restrictedPaths": [
+      "/etc",
+      "/usr/bin",
+      "/System"
+    ]
+  }
+}
