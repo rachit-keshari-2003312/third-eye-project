@@ -70,16 +70,16 @@ interface MCPServer {
         </div>
         <div class="status-filters">
           <button class="filter-btn" 
-                  [class.active]="selectedStatus() === ''"
+                  [class.active]="selectedStatus === ''"
                   (click)="setStatusFilter('')">All</button>
           <button class="filter-btn" 
-                  [class.active]="selectedStatus() === 'connected'"
+                  [class.active]="selectedStatus === 'connected'"
                   (click)="setStatusFilter('connected')">Connected</button>
           <button class="filter-btn" 
-                  [class.active]="selectedStatus() === 'disconnected'"
+                  [class.active]="selectedStatus === 'disconnected'"
                   (click)="setStatusFilter('disconnected')">Disconnected</button>
           <button class="filter-btn" 
-                  [class.active]="selectedStatus() === 'error'"
+                  [class.active]="selectedStatus === 'error'"
                   (click)="setStatusFilter('error')">Error</button>
         </div>
       </div>
@@ -191,7 +191,7 @@ interface MCPServer {
     </div>
 
     <!-- Add Integration Modal -->
-    <div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal($event)">
+    <div class="modal-overlay" *ngIf="showAddModal()" (click)="closeAddModal($event)">
       <div class="add-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h2>Add MCP Server Integration</h2>
@@ -266,8 +266,9 @@ interface MCPServer {
 })
 export class IntegrationsComponent implements OnInit {
   
+  // UI state - using regular properties for ngModel compatibility
   searchQuery = '';
-  selectedStatus = signal('');
+  selectedStatus = '';
   showAddModal = signal(false);
   activeTab = 'preset';
 
@@ -399,7 +400,7 @@ export class IntegrationsComponent implements OnInit {
   }
 
   setStatusFilter(status: string) {
-    this.selectedStatus.set(status);
+    this.selectedStatus = status;
     this.filterServers();
   }
 
@@ -413,8 +414,8 @@ export class IntegrationsComponent implements OnInit {
       );
     }
 
-    if (this.selectedStatus()) {
-      filtered = filtered.filter(s => s.status === this.selectedStatus());
+    if (this.selectedStatus) {
+      filtered = filtered.filter(s => s.status === this.selectedStatus);
     }
 
     this.filteredServers.set(filtered);

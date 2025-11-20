@@ -320,17 +320,20 @@ export class DashboardComponent implements OnInit {
 
   createNewAgent() {
     console.log('Creating new agent...');
-    // Navigate to agents page or open modal
+    alert('Creating new agent. This would navigate to the agents page.');
+    // In a real implementation, this would navigate to agents page
   }
 
   startConversation() {
     console.log('Starting new conversation...');
-    // Navigate to conversations page
+    alert('Starting new conversation. This would navigate to conversations page.');
+    // In a real implementation, this would navigate to conversations page
   }
 
   connectMCP() {
     console.log('Connecting MCP server...');
-    // Navigate to integrations page
+    alert('Connecting MCP server. This would navigate to integrations page.');
+    // In a real implementation, this would navigate to integrations page
   }
 
   getActivityIcon(type: string): string {

@@ -117,17 +117,17 @@ interface BedrockConnection {
             <h2>Available Models</h2>
             <div class="model-filters">
               <button class="filter-btn" 
-                      [class.active]="selectedProvider() === ''"
-                      (click)="selectedProvider.set('')">All</button>
+                      [class.active]="selectedProvider === ''"
+                      (click)="selectedProvider = ''">All</button>
               <button class="filter-btn" 
-                      [class.active]="selectedProvider() === 'anthropic'"
-                      (click)="selectedProvider.set('anthropic')">Anthropic</button>
+                      [class.active]="selectedProvider === 'anthropic'"
+                      (click)="selectedProvider = 'anthropic'">Anthropic</button>
               <button class="filter-btn" 
-                      [class.active]="selectedProvider() === 'amazon'"
-                      (click)="selectedProvider.set('amazon')">Amazon</button>
+                      [class.active]="selectedProvider === 'amazon'"
+                      (click)="selectedProvider = 'amazon'">Amazon</button>
               <button class="filter-btn" 
-                      [class.active]="selectedProvider() === 'ai21'"
-                      (click)="selectedProvider.set('ai21')">AI21</button>
+                      [class.active]="selectedProvider === 'ai21'"
+                      (click)="selectedProvider = 'ai21'">AI21</button>
             </div>
           </div>
 
@@ -330,7 +330,8 @@ export class BedrockComponent implements OnInit {
   connecting = signal(false);
   connectionStatus = signal<'connected' | 'disconnected' | 'error'>('disconnected');
 
-  selectedProvider = signal('');
+  // UI state - using regular properties for ngModel compatibility  
+  selectedProvider = '';
   selectedModel = signal<BedrockModel | null>(null);
 
   chatMessages = signal<ChatMessage[]>([]);
@@ -454,10 +455,10 @@ export class BedrockComponent implements OnInit {
   }
 
   getFilteredModels(): BedrockModel[] {
-    if (!this.selectedProvider()) {
+    if (!this.selectedProvider) {
       return this.availableModels;
     }
-    return this.availableModels.filter(model => model.provider === this.selectedProvider());
+    return this.availableModels.filter(model => model.provider === this.selectedProvider);
   }
 
   selectModel(model: BedrockModel) {

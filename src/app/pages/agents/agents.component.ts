@@ -73,8 +73,8 @@ interface Agent {
           </div>
 
           <div class="view-toggle">
-            <button [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')">⊞</button>
-            <button [class.active]="viewMode() === 'list'" (click)="viewMode.set('list')">☰</button>
+            <button [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'">⊞</button>
+            <button [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">☰</button>
           </div>
         </div>
       </div>
@@ -99,13 +99,13 @@ interface Agent {
               </div>
             </div>
             <div class="agent-actions">
-              <button class="action-btn primary" (click)="startConversation(agent)">
+              <button class="action-btn primary" (click)="startConversation(agent, $event)">
                 <i class="icon">💬</i>
               </button>
-              <button class="action-btn secondary" (click)="editAgent(agent)">
+              <button class="action-btn secondary" (click)="editAgent(agent, $event)">
                 <i class="icon">✏️</i>
               </button>
-              <button class="action-btn danger" (click)="deleteAgent(agent)">
+              <button class="action-btn danger" (click)="deleteAgent(agent, $event)">
                 <i class="icon">🗑️</i>
               </button>
             </div>
@@ -146,7 +146,7 @@ interface Agent {
           </div>
 
           <div class="agent-footer">
-            <button class="deploy-btn" [class.deployed]="agent.status === 'active'" (click)="toggleAgent(agent)">
+            <button class="deploy-btn" [class.deployed]="agent.status === 'active'" (click)="toggleAgent(agent, $event)">
               {{ agent.status === 'active' ? 'Stop' : 'Deploy' }}
             </button>
             <span class="created-date">Created {{ formatDate(agent.created) }}</span>
@@ -166,7 +166,7 @@ interface Agent {
     </div>
 
     <!-- Create Agent Modal -->
-    <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal($event)">
+    <div class="modal-overlay" *ngIf="showCreateModal()" (click)="closeCreateModal($event)">
       <div class="create-agent-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h2>Create New AI Agent</h2>
@@ -253,10 +253,11 @@ interface Agent {
 })
 export class AgentsComponent implements OnInit {
   
-  searchQuery = signal('');
-  selectedStatus = signal('');
-  selectedType = signal('');
-  viewMode = signal<'grid' | 'list'>('grid');
+  // UI state - using regular properties for ngModel compatibility
+  searchQuery = '';
+  selectedStatus = '';
+  selectedType = '';
+  viewMode = 'grid' as 'grid' | 'list';
   showCreateModal = signal(false);
 
   agents = signal<Agent[]>([
@@ -345,19 +346,19 @@ export class AgentsComponent implements OnInit {
   filterAgents() {
     let filtered = this.agents();
 
-    if (this.searchQuery()) {
+    if (this.searchQuery) {
       filtered = filtered.filter(agent => 
-        agent.name.toLowerCase().includes(this.searchQuery().toLowerCase()) ||
-        agent.description.toLowerCase().includes(this.searchQuery().toLowerCase())
+        agent.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        agent.description.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     }
 
-    if (this.selectedStatus()) {
-      filtered = filtered.filter(agent => agent.status === this.selectedStatus());
+    if (this.selectedStatus) {
+      filtered = filtered.filter(agent => agent.status === this.selectedStatus);
     }
 
-    if (this.selectedType()) {
-      filtered = filtered.filter(agent => agent.type === this.selectedType());
+    if (this.selectedType) {
+      filtered = filtered.filter(agent => agent.type === this.selectedType);
     }
 
     this.filteredAgents.set(filtered);
@@ -406,36 +407,57 @@ export class AgentsComponent implements OnInit {
     });
   }
 
-  startConversation(agent: Agent) {
+  startConversation(agent: Agent, event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     console.log('Starting conversation with:', agent.name);
+    alert(`Starting conversation with ${agent.name}. This would navigate to the conversations page.`);
     // Navigate to conversations page with agent pre-selected
   }
 
-  editAgent(agent: Agent) {
+  editAgent(agent: Agent, event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     console.log('Editing agent:', agent.name);
+    alert(`Editing ${agent.name}. This would open an edit modal.`);
     // Open edit modal
   }
 
-  deleteAgent(agent: Agent) {
+  deleteAgent(agent: Agent, event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     if (confirm(`Are you sure you want to delete "${agent.name}"?`)) {
       const updatedAgents = this.agents().filter(a => a.id !== agent.id);
       this.agents.set(updatedAgents);
       this.filterAgents();
+      alert(`${agent.name} has been deleted successfully.`);
     }
   }
 
-  toggleAgent(agent: Agent) {
+  toggleAgent(agent: Agent, event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const newStatus = agent.status === 'active' ? 'idle' : 'active';
     const updatedAgents = this.agents().map(a => {
       if (a.id === agent.id) {
         return {
           ...a,
-          status: a.status === 'active' ? 'idle' : 'active' as Agent['status']
+          status: newStatus as Agent['status']
         };
       }
       return a;
     });
     this.agents.set(updatedAgents);
     this.filterAgents();
+    alert(`${agent.name} is now ${newStatus}.`);
   }
 
   closeCreateModal(event: Event) {
@@ -472,7 +494,10 @@ export class AgentsComponent implements OnInit {
   }
 
   createAgent() {
-    if (!this.isFormValid()) return;
+    if (!this.isFormValid()) {
+      alert('Please fill in all required fields (Name, Description, and at least one capability).');
+      return;
+    }
 
     const newAgent: Agent = {
       id: Date.now().toString(),
@@ -501,5 +526,7 @@ export class AgentsComponent implements OnInit {
     };
     this.capabilityInput = '';
     this.showCreateModal.set(false);
+    
+    alert(`✅ Agent "${newAgent.name}" created successfully!`);
   }
 }

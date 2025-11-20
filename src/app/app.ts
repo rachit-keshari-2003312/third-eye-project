@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
+import { Router, NavigationEnd, RouterOutlet, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { filter } from 'rxjs/operators';
@@ -18,7 +18,7 @@ interface LoginForm {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, FormsModule],
+  imports: [CommonModule, RouterOutlet, FormsModule, RouterLink],
   templateUrl: './app.html',
   styleUrls: ['./app.scss']
 })
@@ -34,6 +34,7 @@ export class AppComponent implements OnInit {
   eyeBlinking = signal(false);
   currentRoute = signal('dashboard');
   searchQuery = signal('');
+  selectedTab = 'dashboard'; // Add ngModel-based tab control
   
   // Login form
   loginForm: LoginForm = {
@@ -101,6 +102,7 @@ export class AppComponent implements OnInit {
   private updateCurrentRoute(url: string) {
     const route = url.split('/')[1] || 'dashboard';
     this.currentRoute.set(route);
+    this.selectedTab = route; // Sync with selectedTab
   }
 
   // Navigation methods
@@ -109,12 +111,28 @@ export class AppComponent implements OnInit {
     console.log('🔄 Current URL:', this.router.url);
     console.log('🔄 Is authenticated:', this.isAuthenticated());
     
+    // Update selected tab immediately for UI feedback
+    this.selectedTab = route;
+    this.currentRoute.set(route);
+    
     // For demo purposes, allow navigation even without authentication
     this.router.navigate([route]).then(success => {
       console.log('✅ Navigation result:', success);
       console.log('🔄 New URL:', this.router.url);
     }).catch(error => {
       console.error('❌ Navigation error:', error);
+    });
+  }
+  
+  // Alternative tab switching method
+  switchTab(tabName: string) {
+    console.log('🔄 Switching to tab:', tabName);
+    this.selectedTab = tabName;
+    this.currentRoute.set(tabName);
+    
+    // Force navigation
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate([tabName]);
     });
   }
 

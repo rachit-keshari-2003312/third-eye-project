@@ -24,73 +24,81 @@
 
             <!-- Navigation Menu -->
             <nav class="nav-menu">
-                <div class="nav-item" 
-                     [class.active]="currentRoute() === 'dashboard'"
-                     (click)="navigateTo('dashboard')"
-                     title="Dashboard">
+                <a class="nav-item" 
+                   routerLink="/dashboard"
+                   [class.active]="selectedTab === 'dashboard'"
+                   (click)="switchTab('dashboard')"
+                   title="Dashboard">
                     <i class="icon">📊</i>
                     <span [class.hidden]="sidebarCollapsed()">Dashboard</span>
-                </div>
+                </a>
 
-                <div class="nav-item" 
-                     [class.active]="currentRoute() === 'agents'"
-                     (click)="navigateTo('agents')"
-                     title="AI Agents">
+                <a class="nav-item" 
+                   routerLink="/agents"
+                   [class.active]="selectedTab === 'agents'"
+                   (click)="switchTab('agents')"
+                   title="AI Agents">
                     <i class="icon">🤖</i>
                     <span [class.hidden]="sidebarCollapsed()">AI Agents</span>
-                </div>
+                </a>
 
-                <div class="nav-item" 
-                     [class.active]="currentRoute() === 'library'"
-                     (click)="navigateTo('library')"
-                     title="Library">
+                <a class="nav-item" 
+                   routerLink="/library"
+                   [class.active]="selectedTab === 'library'"
+                   (click)="switchTab('library')"
+                   title="Library">
                     <i class="icon">📚</i>
                     <span [class.hidden]="sidebarCollapsed()">Library</span>
-                </div>
+                </a>
 
-                <div class="nav-item" 
-                     [class.active]="currentRoute() === 'conversations'"
-                     (click)="navigateTo('conversations')"
-                     title="Conversations">
+                <a class="nav-item" 
+                   routerLink="/conversations"
+                   [class.active]="selectedTab === 'conversations'"
+                   (click)="switchTab('conversations')"
+                   title="Conversations">
                     <i class="icon">💬</i>
                     <span [class.hidden]="sidebarCollapsed()">Conversations</span>
-                </div>
+                </a>
 
-                <div class="nav-item" 
-                     [class.active]="currentRoute() === 'integrations'"
-                     (click)="navigateTo('integrations')"
-                     title="Integrations">
+                <a class="nav-item" 
+                   routerLink="/integrations"
+                   [class.active]="selectedTab === 'integrations'"
+                   (click)="switchTab('integrations')"
+                   title="Integrations">
                     <i class="icon">🔗</i>
                     <span [class.hidden]="sidebarCollapsed()">Integrations</span>
                     <span class="beta-badge" [class.hidden]="sidebarCollapsed()">Beta</span>
-                </div>
+                </a>
 
-                <div class="nav-item" 
-                     [class.active]="currentRoute() === 'bedrock'"
-                     (click)="navigateTo('bedrock')"
-                     title="AWS Bedrock">
+                <a class="nav-item" 
+                   routerLink="/bedrock"
+                   [class.active]="selectedTab === 'bedrock'"
+                   (click)="switchTab('bedrock')"
+                   title="AWS Bedrock">
                     <i class="icon">☁️</i>
                     <span [class.hidden]="sidebarCollapsed()">AWS Bedrock</span>
-                </div>
+                </a>
 
-                <div class="nav-item" 
-                     [class.active]="currentRoute() === 'analytics'"
-                     (click)="navigateTo('analytics')"
-                     title="Analytics">
+                <a class="nav-item" 
+                   routerLink="/analytics"
+                   [class.active]="selectedTab === 'analytics'"
+                   (click)="switchTab('analytics')"
+                   title="Analytics">
                     <i class="icon">📈</i>
                     <span [class.hidden]="sidebarCollapsed()">Analytics</span>
-                </div>
+                </a>
             </nav>
 
             <!-- Account Section -->
             <div class="account-section">
-                <div class="nav-item" 
-                     [class.active]="currentRoute() === 'account'"
-                     (click)="navigateTo('account')"
-                     title="Account">
+                <a class="nav-item" 
+                   routerLink="/account"
+                   [class.active]="selectedTab === 'account'"
+                   (click)="switchTab('account')"
+                   title="Account">
                     <i class="icon">👤</i>
                     <span [class.hidden]="sidebarCollapsed()">Account</span>
-                </div>
+                </a>
                 
                 <div class="nav-item logout" (click)="logout()" title="Logout">
                     <i class="icon">🚪</i>
