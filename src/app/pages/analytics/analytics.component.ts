@@ -204,7 +204,7 @@ export class AnalyticsComponent implements OnInit {
   currentResponse = signal<QueryResponse | null>(null);
   queryHistory = signal<QueryResponse[]>([]);
 
-  private apiBaseUrl = 'http://localhost:3001/api';
+  private apiBaseUrl = 'http://18.207.167.104:3001/api';
   private http = inject(HttpClient);
 
   ngOnInit() {
