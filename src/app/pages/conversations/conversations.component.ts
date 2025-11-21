@@ -262,13 +262,14 @@ export class ConversationsComponent implements OnInit {
         agent: this.selectedAgent
       });
       
-      // Call the backend API
+      // Call the new backend endpoint for conversations
       const response = await firstValueFrom(
-        this.http.post<{ prompt: string; response: string; timestamp: string }>(
-          `${this.apiBaseUrl}/agent/chat`,
+        this.http.post<any>(
+          `${this.apiBaseUrl}/conversations/start`,
           {
-            prompt: this.searchQuery,
-            auto_execute: true
+            agent_type: this.selectedAgent || 'auto',
+            query_text: this.searchQuery,
+            include_context: true
           }
         )
       );
@@ -276,13 +277,13 @@ export class ConversationsComponent implements OnInit {
       const processingTime = Date.now() - startTime;
       
       const successResponse: ApiResponse = {
-        id: queryId,
+        id: response.conversation_id || queryId,
         query: this.searchQuery,
-        response: response.response,
+        response: response.response?.content || response.result || response.response || 'Query processed successfully',
         timestamp: new Date(),
         status: 'success',
         processingTime,
-        agent: this.selectedAgent || 'general'
+        agent: response.agent_type || this.selectedAgent || 'auto'
       };
 
       this.currentResponse = successResponse;

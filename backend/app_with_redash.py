@@ -71,6 +71,12 @@ class PromptRequest(BaseModel):
     prompt: str
     session_id: Optional[str] = None  # For conversation memory
 
+class AnalyticsQueryRequest(BaseModel):
+    """Frontend compatibility model for /api/analytics/execute"""
+    query: str
+    output_format: str = "json"
+    session_id: Optional[str] = None  # For conversation memory
+
 # Routes
 @app.get("/")
 async def root():
@@ -174,6 +180,83 @@ async def analyze_prompt_only(request: PromptRequest):
         }
     except Exception as e:
         logger.error(f"Error analyzing prompt: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/analytics/execute")
+async def execute_analytics_query(request: AnalyticsQueryRequest):
+    """
+    Frontend compatibility endpoint - Routes to the AI agent
+    This is an alias for /api/agent/prompt to support frontend integration
+    
+    Example:
+        POST /api/analytics/execute
+        {
+            "query": "Give me last 7 days ckyc count from ckyc_details table",
+            "output_format": "json",
+            "session_id": "optional-session-id"
+        }
+    """
+    if not smart_agent:
+        raise HTTPException(status_code=500, detail="Smart Agent not available")
+    
+    try:
+        logger.info(f"[Analytics API] Received query: {request.query}")
+        
+        # Get or create conversation session
+        conv_memory = get_conversation_memory()
+        session_id = request.session_id
+        
+        if not session_id:
+            session_id = conv_memory.create_session()
+            logger.info(f"[Analytics API] Created new session: {session_id}")
+        elif session_id not in conv_memory.get_active_sessions():
+            logger.warning(f"[Analytics API] Invalid session {session_id}, creating new one")
+            session_id = conv_memory.create_session()
+        else:
+            logger.info(f"[Analytics API] Using existing session: {session_id}")
+        
+        # Get conversation context
+        context = conv_memory.get_context_summary(session_id) if conv_memory.get_history(session_id) else ""
+        
+        # Process with AI agent
+        result = await smart_agent.process_prompt(request.query)
+        
+        # Store conversation turn
+        conv_memory.add_turn(session_id, request.query, result)
+        
+        # Return in frontend-compatible format
+        response = {
+            "success": result.get('success', False),
+            "query_id": f"query_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            "query": request.query,
+            "prompt": request.query,
+            "session_id": session_id,
+            "output_format": request.output_format,
+            "analysis": result.get('analysis', {}),
+            "service": result.get('service'),
+            "action": result.get('action'),
+            "result": result.get('result'),
+            "raw_data": result.get('raw_data'),
+            "answer": result.get('answer'),
+            "llm_intent": result.get('llm_intent'),
+            "sql": result.get('sql'),
+            "explanation": result.get('explanation'),
+            "row_count": result.get('row_count'),
+            "data_source_id": result.get('data_source_id'),
+            "error": result.get('error'),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Add context info if available
+        if context:
+            response["has_context"] = True
+            response["context_turns"] = len(conv_memory.get_history(session_id))
+        
+        logger.info(f"[Analytics API] Query processed successfully (session: {session_id})")
+        return response
+        
+    except Exception as e:
+        logger.error(f"[Analytics API] Error executing query: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Redash endpoints
