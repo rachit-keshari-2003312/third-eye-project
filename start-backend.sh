@@ -4,8 +4,11 @@
 echo "🚀 Starting Third-Eye Backend (REAL MODE)..."
 echo ""
 
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # Go to project root
-cd /Users/sanu.chaudhary/Desktop/Finhack/third-eye-project
+cd "$SCRIPT_DIR"
 
 # Activate virtual environment
 source venv/bin/activate

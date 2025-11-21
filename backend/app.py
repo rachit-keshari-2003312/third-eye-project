@@ -541,6 +541,94 @@ async def get_usage_analytics():
         "mcp_calls": 89
     }
 
+# Dashboard Test Endpoints
+@app.post("/api/dashboard/test-query")
+async def test_dashboard_query():
+    """Test endpoint for metric widget generation"""
+    return {
+        "success": True,
+        "prompt": "Show me the total number of CKYC details fetched in the last 30 days",
+        "analysis": {"query_type": "count", "time_range": "30 days"},
+        "service": "redash",
+        "action": "sql_query",
+        "result": None,
+        "raw_data": {
+            "columns": [{"friendly_name": "CKYC Details Fetched", "type": "integer", "name": "ckyc_details_fetched"}],
+            "rows": [{"ckyc_details_fetched": 11871}]
+        },
+        "answer": "In the last 30 days, 11,871 CKYC details have been fetched.",
+        "sql": "SELECT COUNT(*) AS ckyc_details_fetched FROM ckyc_details WHERE updated_at >= NOW() - INTERVAL 30 DAY;",
+        "explanation": "This query counts rows from the last 30 days.",
+        "row_count": 1,
+        "data_source_id": 79,
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.post("/api/dashboard/test-table-query")
+async def test_dashboard_table_query():
+    """Test endpoint for table widget generation"""
+    return {
+        "success": True,
+        "prompt": "Show me the top 5 users by transaction count in the last week",
+        "analysis": {"query_type": "aggregation"},
+        "service": "redash",
+        "action": "sql_query",
+        "result": None,
+        "raw_data": {
+            "columns": [
+                {"friendly_name": "User ID", "type": "integer", "name": "user_id"},
+                {"friendly_name": "Username", "type": "string", "name": "username"},
+                {"friendly_name": "Transaction Count", "type": "integer", "name": "transaction_count"},
+                {"friendly_name": "Total Amount", "type": "float", "name": "total_amount"}
+            ],
+            "rows": [
+                {"user_id": 1234, "username": "alice_smith", "transaction_count": 245, "total_amount": 15678.50},
+                {"user_id": 5678, "username": "bob_jones", "transaction_count": 198, "total_amount": 12456.75},
+                {"user_id": 9012, "username": "carol_white", "transaction_count": 187, "total_amount": 9876.25},
+                {"user_id": 3456, "username": "david_brown", "transaction_count": 156, "total_amount": 8234.90},
+                {"user_id": 7890, "username": "eve_davis", "transaction_count": 143, "total_amount": 7654.30}
+            ]
+        },
+        "answer": "Top 5 users by transaction count.",
+        "sql": "SELECT user_id, username, COUNT(*) as transaction_count, SUM(amount) as total_amount FROM transactions WHERE created_at >= NOW() - INTERVAL 7 DAY GROUP BY user_id, username ORDER BY transaction_count DESC LIMIT 5;",
+        "row_count": 5,
+        "data_source_id": 79,
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.post("/api/dashboard/test-chart-query")
+async def test_dashboard_chart_query():
+    """Test endpoint for chart widget generation"""
+    return {
+        "success": True,
+        "prompt": "Show me daily transaction counts for the last 7 days",
+        "analysis": {"query_type": "time_series"},
+        "service": "redash",
+        "action": "sql_query",
+        "result": None,
+        "raw_data": {
+            "columns": [
+                {"friendly_name": "Date", "type": "date", "name": "date"},
+                {"friendly_name": "Transaction Count", "type": "integer", "name": "transaction_count"},
+                {"friendly_name": "Total Amount", "type": "float", "name": "total_amount"}
+            ],
+            "rows": [
+                {"date": "2025-11-14", "transaction_count": 1245, "total_amount": 87650.25},
+                {"date": "2025-11-15", "transaction_count": 1398, "total_amount": 92340.50},
+                {"date": "2025-11-16", "transaction_count": 1156, "total_amount": 78920.75},
+                {"date": "2025-11-17", "transaction_count": 1487, "total_amount": 95670.00},
+                {"date": "2025-11-18", "transaction_count": 1623, "total_amount": 102340.25},
+                {"date": "2025-11-19", "transaction_count": 1534, "total_amount": 98765.50},
+                {"date": "2025-11-20", "transaction_count": 1401, "total_amount": 91234.75}
+            ]
+        },
+        "answer": "Daily transaction breakdown for the last 7 days.",
+        "sql": "SELECT DATE(created_at) as date, COUNT(*) as transaction_count, SUM(amount) as total_amount FROM transactions WHERE created_at >= NOW() - INTERVAL 7 DAY GROUP BY DATE(created_at) ORDER BY date;",
+        "row_count": 7,
+        "data_source_id": 79,
+        "timestamp": datetime.now().isoformat()
+    }
+
 if __name__ == "__main__":
     import uvicorn
     

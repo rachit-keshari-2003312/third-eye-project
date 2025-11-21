@@ -2,8 +2,15 @@
 
 # Third-Eye Complete System Startup Script
 
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Change to the script directory
+cd "$SCRIPT_DIR"
+
 echo "🚀 Starting Third-Eye Agentic AI Platform..."
 echo "================================================"
+echo "📂 Working directory: $(pwd)"
 
 # Function to check if a port is in use
 check_port() {
@@ -47,16 +54,15 @@ fi
 source venv/bin/activate
 
 # Install minimal required dependencies
-if ! python -c "import fastapi" &> /dev/null; then
+if ! python3 -c "import fastapi" &> /dev/null; then
     echo "📥 Installing backend dependencies..."
-    pip install fastapi uvicorn boto3 httpx python-multipart
+    python3 -m pip install fastapi uvicorn boto3 httpx python-multipart
 fi
 
 # Start backend
 echo "🚀 Starting FastAPI backend..."
-cd backend && python app.py &
+(cd backend && python3 app.py) &
 BACKEND_PID=$!
-cd ..
 
 # Wait for backend to start
 echo "⏳ Waiting for backend to initialize..."
@@ -74,6 +80,10 @@ fi
 echo ""
 echo "🟢 Step 2: Starting Frontend Server..."
 echo "======================================"
+
+# Ensure we're back in the script directory
+cd "$SCRIPT_DIR"
+echo "📂 Frontend working directory: $(pwd)"
 
 # Disable Angular analytics
 ng analytics disable &>/dev/null || true
