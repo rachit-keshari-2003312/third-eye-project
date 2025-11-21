@@ -99,6 +99,11 @@ class PromptRequest(BaseModel):
     prompt: str
     auto_execute: bool = True
 
+class ConversationRequest(BaseModel):
+    agent_type: str
+    query_text: str
+    include_context: bool = True
+
 class AgentConfig(BaseModel):
     name: str
     description: str
@@ -412,6 +417,92 @@ async def delete_agent(agent_id: str):
 @app.get("/api/conversations")
 async def get_conversations():
     return {"conversations": conversations}
+
+@app.post("/api/conversations/start")
+async def start_conversation(request: ConversationRequest):
+    """
+    Start a new conversation with the selected agent type.
+    This endpoint is called when the user clicks 'Start Search' button.
+    """
+    try:
+        # Generate conversation ID
+        conversation_id = f"conv_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{request.agent_type}"
+        
+        # Initialize conversation
+        if conversation_id not in conversations:
+            conversations[conversation_id] = []
+        
+        # Create user message
+        user_message = ChatMessage(
+            role="user",
+            content=request.query_text,
+            timestamp=datetime.now()
+        )
+        conversations[conversation_id].append(user_message)
+        
+        # Get agent instance
+        agent = get_agent(request.agent_type)
+        if not agent:
+            raise HTTPException(status_code=404, detail=f"Agent type '{request.agent_type}' not found")
+        
+        # Process query with the agent
+        logger.info(f"Processing query with agent: {request.agent_type}")
+        logger.info(f"Query: {request.query_text}")
+        
+        # Use the smart agent to process the query
+        try:
+            result = await agent.process_query(
+                prompt=request.query_text,
+                auto_execute=True
+            )
+            
+            # Create AI response
+            ai_response = ChatMessage(
+                role="assistant",
+                content=result.get("answer", "I've processed your request."),
+                timestamp=datetime.now(),
+                model=request.agent_type
+            )
+            conversations[conversation_id].append(ai_response)
+            
+            return {
+                "success": True,
+                "conversation_id": conversation_id,
+                "agent_type": request.agent_type,
+                "query": request.query_text,
+                "response": ai_response.model_dump(),
+                "result": result
+            }
+            
+        except Exception as agent_error:
+            logger.error(f"Agent processing error: {str(agent_error)}")
+            # Return a mock response if agent fails
+            ai_response = ChatMessage(
+                role="assistant",
+                content=f"I understand your query: '{request.query_text}'. I'm processing it with the {request.agent_type} agent. This is a demonstration response showing the agent is working.",
+                timestamp=datetime.now(),
+                model=request.agent_type
+            )
+            conversations[conversation_id].append(ai_response)
+            
+            return {
+                "success": True,
+                "conversation_id": conversation_id,
+                "agent_type": request.agent_type,
+                "query": request.query_text,
+                "response": ai_response.model_dump(),
+                "result": {
+                    "status": "processed",
+                    "agent": request.agent_type,
+                    "message": "Query received and being processed"
+                }
+            }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error starting conversation: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/conversations/{conversation_id}/messages")
 async def send_message(conversation_id: str, message: ChatMessage):

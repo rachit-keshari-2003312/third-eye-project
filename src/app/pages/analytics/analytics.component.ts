@@ -234,12 +234,24 @@ export class AnalyticsComponent implements OnInit {
     this.isProcessing.set(true);
 
     try {
-      // Generate mock JSON response for analytics
-      const jsonResponse = await this.generateAnalyticsJSON(this.queryText);
+      // Call the backend analytics endpoint
+      console.log('🚀 Calling analytics API:', {
+        query: this.queryText,
+        output_format: this.outputFormat
+      });
+
+      const response = await this.http.post<any>(`${this.apiBaseUrl}/analytics/execute`, {
+        query: this.queryText,
+        output_format: this.outputFormat
+      }).toPromise();
+
       const processingTime = Date.now() - startTime;
+      const jsonResponse = response.result || response;
+      
+      console.log('✅ Backend response:', response);
       
       const successResponse: QueryResponse = {
-        id: queryId,
+        id: response.query_id || queryId,
         query: this.queryText,
         response: jsonResponse,
         timestamp: new Date(),
