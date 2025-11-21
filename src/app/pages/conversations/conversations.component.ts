@@ -222,7 +222,7 @@ export class ConversationsComponent implements OnInit {
   currentResponse: ApiResponse | null = null;
   queryHistory: ApiResponse[] = [];
 
-  private apiBaseUrl = 'http://localhost:8000/api';
+  private apiBaseUrl = 'http://18.207.167.104:8000';
   private http = inject(HttpClient);
 
   ngOnInit() {
@@ -262,7 +262,7 @@ export class ConversationsComponent implements OnInit {
         agent: this.selectedAgent
       });
       
-       // Call the local proxy API endpoint to avoid CORS
+       // Call the external API directly
        const response = await firstValueFrom(
          this.http.post<any>(
            `${this.apiBaseUrl}/query`,
