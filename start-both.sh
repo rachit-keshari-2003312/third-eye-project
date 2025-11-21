@@ -1,5 +1,5 @@
 #!/bin/bash
-
+z
 # Third-Eye Complete System Startup Script
 
 # Get the directory where this script is located
