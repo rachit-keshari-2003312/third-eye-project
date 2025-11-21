@@ -262,29 +262,28 @@ export class ConversationsComponent implements OnInit {
         agent: this.selectedAgent
       });
       
-      // Call the new backend endpoint for conversations
-      const response = await firstValueFrom(
-        this.http.post<any>(
-          `${this.apiBaseUrl}/conversations/start`,
-          {
-            agent_type: this.selectedAgent || 'auto',
-            query_text: this.searchQuery,
-            include_context: true
-          }
-        )
-      );
+       // Call the local proxy API endpoint to avoid CORS
+       const response = await firstValueFrom(
+         this.http.post<any>(
+           `${this.apiBaseUrl}/query`,
+           {
+             prompt: this.searchQuery,
+             model: "openai.gpt-oss-120b-1:0"
+           }
+         )
+       );
       
       const processingTime = Date.now() - startTime;
       
-      const successResponse: ApiResponse = {
-        id: response.conversation_id || queryId,
-        query: this.searchQuery,
-        response: response.response?.content || response.result || response.response || 'Query processed successfully',
-        timestamp: new Date(),
-        status: 'success',
-        processingTime,
-        agent: response.agent_type || this.selectedAgent || 'auto'
-      };
+       const successResponse: ApiResponse = {
+         id: queryId,
+         query: this.searchQuery,
+         response: response.response || response.answer || response.result || 'Query processed successfully',
+         timestamp: new Date(),
+         status: 'success',
+         processingTime,
+         agent: this.selectedAgent || 'openai.gpt-oss-120b-1:0'
+       };
 
       this.currentResponse = successResponse;
       this.queryHistory = [...this.queryHistory, successResponse];
