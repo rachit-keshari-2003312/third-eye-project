@@ -1,0 +1,155 @@
+[
+  {
+    "id": "insight_1",
+    "conversation_id": "chat_20251120163237_1",
+    "user_message": "List all files in the directory",
+    "ai_response": "Here are the files in the directory: file1.txt, file2.py, data.json",
+    "metadata": {
+      "mcp_server": "filesystem",
+      "mcp_method": "process_message",
+      "mcp_response": {
+        "result": "success",
+        "data": "Here are the files in the directory: file1.txt, file2.py, data.json",
+        "content": "Directory listing: file1.txt, file2.py, data.json"
+      },
+      "bedrock_enhanced": false
+    },
+    "timestamp": "2025-11-20T16:32:37.507731",
+    "topics": [
+      "data"
+    ],
+    "keywords": [
+      "files",
+      "directory",
+      "file2.py,",
+      "data.json",
+      "list",
+      "file1.txt,",
+      "here",
+      "directory:"
+    ]
+  },
+  {
+    "id": "insight_2",
+    "conversation_id": "chat_20251120163237_1",
+    "user_message": "Show me the directory contents",
+    "ai_response": "Here are the files in the directory: file1.txt, file2.py, data.json",
+    "metadata": {
+      "mcp_server": "filesystem",
+      "mcp_method": "process_message",
+      "mcp_response": {
+        "result": "success",
+        "data": "Here are the files in the directory: file1.txt, file2.py, data.json",
+        "content": "Directory listing: file1.txt, file2.py, data.json"
+      },
+      "bedrock_enhanced": false
+    },
+    "timestamp": "2025-11-20T16:32:38.160031",
+    "topics": [
+      "data"
+    ],
+    "keywords": [
+      "files",
+      "contents",
+      "directory",
+      "file2.py,",
+      "show",
+      "data.json",
+      "file1.txt,",
+      "here",
+      "directory:"
+    ]
+  },
+  {
+    "id": "insight_3",
+    "conversation_id": "chat_20251120163237_1",
+    "user_message": "Show me all database tables",
+    "ai_response": "Available tables: users, orders, products",
+    "metadata": {
+      "mcp_server": "database",
+      "mcp_method": "process_message",
+      "mcp_response": {
+        "result": "success",
+        "data": "Available tables: users, orders, products",
+        "content": "Database schema: users, orders, products"
+      },
+      "bedrock_enhanced": false
+    },
+    "timestamp": "2025-11-20T16:32:38.175186",
+    "topics": [
+      "data",
+      "database",
+      "ai"
+    ],
+    "keywords": [
+      "orders,",
+      "show",
+      "tables:",
+      "users,",
+      "tables",
+      "products",
+      "database",
+      "available"
+    ]
+  },
+  {
+    "id": "insight_4",
+    "conversation_id": "chat_20251120163740_1",
+    "user_message": "List all files in the directory",
+    "ai_response": "Here are the files in the directory: file1.txt, file2.py, data.json",
+    "metadata": {
+      "mcp_server": "filesystem",
+      "mcp_method": "process_message",
+      "mcp_response": {
+        "result": "success",
+        "data": "Here are the files in the directory: file1.txt, file2.py, data.json",
+        "content": "Directory listing: file1.txt, file2.py, data.json"
+      },
+      "bedrock_enhanced": false
+    },
+    "timestamp": "2025-11-20T16:37:40.157181",
+    "topics": [
+      "data"
+    ],
+    "keywords": [
+      "list",
+      "files",
+      "file1.txt,",
+      "directory",
+      "file2.py,",
+      "directory:",
+      "here",
+      "data.json"
+    ]
+  },
+  {
+    "id": "insight_5",
+    "conversation_id": "chat_20251120164054_2",
+    "user_message": "search about payu in brave",
+    "ai_response": "I can help you with file operations. You asked: 'search about payu in brave'. I can list directories, read files, or write files. What would you like to do?",
+    "metadata": {
+      "mcp_server": "filesystem",
+      "mcp_method": "process_message",
+      "mcp_response": {
+        "result": "success",
+        "data": "I can help you with file operations. You asked: 'search about payu in brave'. I can list directories, read files, or write files. What would you like to do?",
+        "content": "Filesystem MCP is ready. Your message: 'search about payu in brave'"
+      },
+      "bedrock_enhanced": false
+    },
+    "timestamp": "2025-11-20T16:40:54.676909",
+    "topics": [],
+    "keywords": [
+      "file",
+      "read",
+      "'search",
+      "list",
+      "would",
+      "operations.",
+      "write",
+      "directories,",
+      "about",
+      "brave'."
+    ]
+  }
+]
