@@ -204,7 +204,7 @@ export class AnalyticsComponent implements OnInit {
   currentResponse = signal<QueryResponse | null>(null);
   queryHistory = signal<QueryResponse[]>([]);
 
-  private apiBaseUrl = 'http://localhost:8000/api';
+  private apiBaseUrl = 'https://mighty-bushes-unite.loca.lt/api';
   private http = inject(HttpClient);
 
   ngOnInit() {
