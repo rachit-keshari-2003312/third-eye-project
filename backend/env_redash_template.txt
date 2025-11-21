@@ -1,0 +1,47 @@
+# Third-Eye Backend Environment Configuration
+# Copy this content to backend/.env file
+
+# ============================================
+# AWS Credentials for Bedrock
+# ============================================
+AWS_ACCESS_KEY_ID=your_access_key_here
+AWS_SECRET_ACCESS_KEY=your_secret_key_here
+AWS_SESSION_TOKEN=your_session_token_here
+AWS_REGION=us-east-1
+
+# ============================================
+# Redash MCP Server Configuration (ACTIVE)
+# ============================================
+REDASH_URL=https://redash-v2.payufin.in
+REDASH_API_KEY=w1RttStIdz9guq96an5gVCqz4w4R56VdSLAq3uZ5
+
+# ============================================
+# MCP Server Environment Variables
+# ============================================
+BRAVE_API_KEY=your_brave_api_key_here
+POSTGRES_CONNECTION_STRING=postgresql://user:password@localhost:5432/dbname
+SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
+GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_github_token
+OPENWEATHER_API_KEY=your_openweather_api_key
+
+# ============================================
+# Email Configuration
+# ============================================
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASSWORD=your_app_password
+
+# ============================================
+# Server Configuration
+# ============================================
+BACKEND_HOST=0.0.0.0
+BACKEND_PORT=8000
+FRONTEND_URL=http://localhost:4200
+
+# ============================================
+# Development Settings
+# ============================================
+DEBUG=true
+LOG_LEVEL=info
+
