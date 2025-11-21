@@ -32,9 +32,9 @@ export class AppComponent implements OnInit {
   // UI state
   sidebarCollapsed = signal(false);
   eyeBlinking = signal(false);
-  currentRoute = signal('dashboard');
+  currentRoute = signal('conversations');
   searchQuery = signal('');
-  selectedTab = 'dashboard'; // Add ngModel-based tab control
+  selectedTab = 'conversations'; // Add ngModel-based tab control
   
   // Login form
   loginForm: LoginForm = {
@@ -44,12 +44,7 @@ export class AppComponent implements OnInit {
 
   // Navigation items
   navigationItems = [
-    { route: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { route: 'agents', label: 'AI Agents', icon: '🤖' },
-    { route: 'library', label: 'Library', icon: '📚' },
     { route: 'conversations', label: 'Conversations', icon: '💬' },
-    { route: 'integrations', label: 'Integrations', icon: '🔗', badge: 'Beta' },
-    { route: 'bedrock', label: 'AWS Bedrock', icon: '☁️' },
     { route: 'analytics', label: 'Analytics', icon: '📈' }
   ];
 
@@ -100,7 +95,7 @@ export class AppComponent implements OnInit {
   }
 
   private updateCurrentRoute(url: string) {
-    const route = url.split('/')[1] || 'dashboard';
+    const route = url.split('/')[1] || 'conversations';
     this.currentRoute.set(route);
     this.selectedTab = route; // Sync with selectedTab
   }
@@ -199,7 +194,7 @@ export class AppComponent implements OnInit {
     }
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
-    this.router.navigate(['dashboard']);
+    this.router.navigate(['conversations']);
   }
 
   closeLoginModal(event: Event) {

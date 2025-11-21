@@ -25,58 +25,12 @@
             <!-- Navigation Menu -->
             <nav class="nav-menu">
                 <a class="nav-item" 
-                   routerLink="/dashboard"
-                   [class.active]="selectedTab === 'dashboard'"
-                   (click)="switchTab('dashboard')"
-                   title="Dashboard">
-                    <i class="icon">📊</i>
-                    <span [class.hidden]="sidebarCollapsed()">Dashboard</span>
-                </a>
-
-                <a class="nav-item" 
-                   routerLink="/agents"
-                   [class.active]="selectedTab === 'agents'"
-                   (click)="switchTab('agents')"
-                   title="AI Agents">
-                    <i class="icon">🤖</i>
-                    <span [class.hidden]="sidebarCollapsed()">AI Agents</span>
-                </a>
-
-                <a class="nav-item" 
-                   routerLink="/library"
-                   [class.active]="selectedTab === 'library'"
-                   (click)="switchTab('library')"
-                   title="Library">
-                    <i class="icon">📚</i>
-                    <span [class.hidden]="sidebarCollapsed()">Library</span>
-                </a>
-
-                <a class="nav-item" 
                    routerLink="/conversations"
                    [class.active]="selectedTab === 'conversations'"
                    (click)="switchTab('conversations')"
                    title="Conversations">
                     <i class="icon">💬</i>
                     <span [class.hidden]="sidebarCollapsed()">Conversations</span>
-                </a>
-
-                <a class="nav-item" 
-                   routerLink="/integrations"
-                   [class.active]="selectedTab === 'integrations'"
-                   (click)="switchTab('integrations')"
-                   title="Integrations">
-                    <i class="icon">🔗</i>
-                    <span [class.hidden]="sidebarCollapsed()">Integrations</span>
-                    <span class="beta-badge" [class.hidden]="sidebarCollapsed()">Beta</span>
-                </a>
-
-                <a class="nav-item" 
-                   routerLink="/bedrock"
-                   [class.active]="selectedTab === 'bedrock'"
-                   (click)="switchTab('bedrock')"
-                   title="AWS Bedrock">
-                    <i class="icon">☁️</i>
-                    <span [class.hidden]="sidebarCollapsed()">AWS Bedrock</span>
                 </a>
 
                 <a class="nav-item" 
@@ -91,15 +45,6 @@
 
             <!-- Account Section -->
             <div class="account-section">
-                <a class="nav-item" 
-                   routerLink="/account"
-                   [class.active]="selectedTab === 'account'"
-                   (click)="switchTab('account')"
-                   title="Account">
-                    <i class="icon">👤</i>
-                    <span [class.hidden]="sidebarCollapsed()">Account</span>
-                </a>
-                
                 <div class="nav-item logout" (click)="logout()" title="Logout">
                     <i class="icon">🚪</i>
                     <span [class.hidden]="sidebarCollapsed()">Logout</span>
