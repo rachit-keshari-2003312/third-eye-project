@@ -1,22 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Third-Eye - Agentic AI Platform</title>
-</head>
-<body>
-    <div class="app-container">
+<div class="app-container">
         <!-- Sidebar -->
-        <div class="sidebar" [class.collapsed]="sidebarCollapsed()">
+        <div class="sidebar" [class.collapsed]="sidebarCollapsed">
             <!-- Logo Section -->
             <div class="logo-section">
                 <div class="logo-icon">
-                    <div class="eye-animation" [class.blink]="eyeBlinking()">
+                    <div class="eye-animation" [class.blink]="eyeBlinking">
                         👁️
                     </div>
                 </div>
-                <div class="logo-text" [class.hidden]="sidebarCollapsed()">
+                <div class="logo-text" [class.hidden]="sidebarCollapsed">
                     <h2>Third-Eye</h2>
                     <span>Agentic AI Platform</span>
                 </div>
@@ -30,7 +22,7 @@
                    (click)="switchTab('conversations')"
                    title="Conversations">
                     <i class="icon">💬</i>
-                    <span [class.hidden]="sidebarCollapsed()">Conversations</span>
+                    <span [class.hidden]="sidebarCollapsed">Conversations</span>
                 </a>
 
                 <a class="nav-item" 
@@ -39,26 +31,18 @@
                    (click)="switchTab('analytics')"
                    title="Analytics">
                     <i class="icon">📈</i>
-                    <span [class.hidden]="sidebarCollapsed()">Analytics</span>
+                    <span [class.hidden]="sidebarCollapsed">Analytics</span>
                 </a>
             </nav>
 
-            <!-- Account Section -->
-            <div class="account-section">
-                <div class="nav-item logout" (click)="logout()" title="Logout">
-                    <i class="icon">🚪</i>
-                    <span [class.hidden]="sidebarCollapsed()">Logout</span>
-                </div>
-            </div>
-
             <!-- Collapse Toggle -->
             <div class="collapse-toggle" (click)="toggleSidebar()">
-                <i class="icon">{{ sidebarCollapsed() ? '▶️' : '◀️' }}</i>
+                <i class="icon">{{ sidebarCollapsed ? '▶️' : '◀️' }}</i>
             </div>
         </div>
 
         <!-- Main Content -->
-        <div class="main-content" [class.expanded]="sidebarCollapsed()">
+        <div class="main-content" [class.expanded]="sidebarCollapsed">
             <!-- Header -->
             <header class="header">
                 <div class="header-left">
@@ -74,9 +58,9 @@
                         <i class="search-icon">🔍</i>
                     </div>
                     
-                    <div class="user-profile" (click)="toggleAuthDemo()">
+                    <div class="user-profile">
                         <div class="user-avatar">{{ getUserInitials() }}</div>
-                        <span class="user-name">{{ currentUser()?.email }}</span>
+                        <span class="user-name">{{ currentUser?.email }}</span>
                     </div>
                 </div>
             </header>
@@ -89,7 +73,7 @@
     </div>
 
     <!-- Login Modal -->
-    <div class="login-overlay" *ngIf="!isAuthenticated()" (click)="closeLoginModal($event)">
+    <div class="login-overlay" *ngIf="!isAuthenticated" (click)="closeLoginModal($event)">
         <div class="login-modal" (click)="$event.stopPropagation()">
             <div class="login-header">
                 <div class="login-logo">
@@ -132,5 +116,3 @@
             </form>
       </div>
     </div>
-</body>
-</html>

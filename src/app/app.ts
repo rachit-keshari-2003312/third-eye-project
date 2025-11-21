@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd, RouterOutlet, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -26,15 +26,15 @@ export class AppComponent implements OnInit {
   title = 'Third-Eye - Agentic AI Platform';
   
   // Authentication state (set to true for demo purposes)
-  isAuthenticated = signal(true);
-  currentUser = signal<User | null>({ email: 'demo@thirdeye.ai', apiKey: 'demo-key', name: 'Demo User' });
+  isAuthenticated = true;
+  currentUser: User | null = { email: 'demo@thirdeye.ai', apiKey: 'demo-key', name: 'Demo User' };
   
   // UI state
-  sidebarCollapsed = signal(false);
-  eyeBlinking = signal(false);
-  currentRoute = signal('conversations');
-  searchQuery = signal('');
-  selectedTab = 'conversations'; // Add ngModel-based tab control
+  sidebarCollapsed = false;
+  eyeBlinking = false;
+  currentRoute = 'conversations';
+  searchQuery = '';
+  selectedTab = 'conversations';
   
   // Login form
   loginForm: LoginForm = {
@@ -75,8 +75,8 @@ export class AppComponent implements OnInit {
       if (storedUser) {
         try {
           const user = JSON.parse(storedUser);
-          this.currentUser.set(user);
-          this.isAuthenticated.set(true);
+          this.currentUser = user;
+          this.isAuthenticated = true;
         } catch (error) {
           console.error('Error parsing stored user:', error);
           localStorage.removeItem('thirdEyeUser');
@@ -87,28 +87,28 @@ export class AppComponent implements OnInit {
 
   private startEyeBlinking() {
     setInterval(() => {
-      this.eyeBlinking.set(true);
+      this.eyeBlinking = true;
       setTimeout(() => {
-        this.eyeBlinking.set(false);
+        this.eyeBlinking = false;
       }, 150);
     }, 3000 + Math.random() * 2000); // Random interval between 3-5 seconds
   }
 
   private updateCurrentRoute(url: string) {
     const route = url.split('/')[1] || 'conversations';
-    this.currentRoute.set(route);
-    this.selectedTab = route; // Sync with selectedTab
+    this.currentRoute = route;
+    this.selectedTab = route;
   }
 
   // Navigation methods
   navigateTo(route: string) {
     console.log('🔄 Navigation clicked:', route);
     console.log('🔄 Current URL:', this.router.url);
-    console.log('🔄 Is authenticated:', this.isAuthenticated());
+    console.log('🔄 Is authenticated:', this.isAuthenticated);
     
     // Update selected tab immediately for UI feedback
     this.selectedTab = route;
-    this.currentRoute.set(route);
+    this.currentRoute = route;
     
     // For demo purposes, allow navigation even without authentication
     this.router.navigate([route]).then(success => {
@@ -123,7 +123,7 @@ export class AppComponent implements OnInit {
   switchTab(tabName: string) {
     console.log('🔄 Switching to tab:', tabName);
     this.selectedTab = tabName;
-    this.currentRoute.set(tabName);
+    this.currentRoute = tabName;
     
     // Force navigation
     this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
@@ -132,17 +132,17 @@ export class AppComponent implements OnInit {
   }
 
   toggleSidebar() {
-    this.sidebarCollapsed.update(collapsed => !collapsed);
+    this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
   getPageTitle(): string {
-    const route = this.currentRoute();
+    const route = this.currentRoute;
     const navItem = this.navigationItems.find(item => item.route === route);
     return navItem ? navItem.label : 'Dashboard';
   }
 
   getUserInitials(): string {
-    const user = this.currentUser();
+    const user = this.currentUser;
     if (!user) return 'U';
     
     if (user.name) {
@@ -175,26 +175,17 @@ export class AppComponent implements OnInit {
       if (typeof window !== 'undefined' && window.localStorage) {
         localStorage.setItem('thirdEyeUser', JSON.stringify(user));
       }
-      this.currentUser.set(user);
-      this.isAuthenticated.set(true);
+      this.currentUser = user;
+      this.isAuthenticated = true;
 
       // Reset form
       this.loginForm = { email: '', apiKey: '' };
 
-      // Navigate to dashboard
-      this.router.navigate(['/dashboard']);
+      // Navigate to conversations
+      this.router.navigate(['/conversations']);
     } else {
       alert('Please enter a valid email and API key (minimum 8 characters)');
     }
-  }
-
-  logout() {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.removeItem('thirdEyeUser');
-    }
-    this.currentUser.set(null);
-    this.isAuthenticated.set(false);
-    this.router.navigate(['conversations']);
   }
 
   closeLoginModal(event: Event) {
@@ -215,21 +206,5 @@ export class AppComponent implements OnInit {
     return username.split('.').map(part => 
       part.charAt(0).toUpperCase() + part.slice(1)
     ).join(' ');
-  }
-
-  // Demo function to toggle authentication for testing
-  toggleAuthDemo() {
-    if (this.isAuthenticated()) {
-      this.logout();
-    } else {
-      // Quick demo login
-      const demoUser: User = {
-        email: 'demo@thirdeye.ai',
-        apiKey: 'demo-key-123',
-        name: 'Demo User'
-      };
-      this.currentUser.set(demoUser);
-      this.isAuthenticated.set(true);
-    }
   }
 }
