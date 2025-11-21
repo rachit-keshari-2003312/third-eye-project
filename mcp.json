@@ -107,6 +107,26 @@
         "EMAIL_USER": "${EMAIL_USER}",
         "EMAIL_PASSWORD": "${EMAIL_PASSWORD}"
       }
+    },
+    "redash-mcp": {
+      "command": "npx",
+      "args": ["-y", "@suthio/redash-mcp"],
+      "description": "Redash analytics and data visualization platform integration",
+      "capabilities": [
+        "list_queries",
+        "get_query",
+        "create_query",
+        "update_query",
+        "execute_query",
+        "list_dashboards",
+        "get_dashboard",
+        "list_data_sources",
+        "create_visualization"
+      ],
+      "env": {
+        "REDASH_URL": "${REDASH_URL}",
+        "REDASH_API_KEY": "${REDASH_API_KEY}"
+      }
     }
   },
   "defaults": {

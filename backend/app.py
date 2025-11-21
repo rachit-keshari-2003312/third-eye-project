@@ -17,16 +17,52 @@ from datetime import datetime
 import boto3
 from botocore.exceptions import ClientError
 import httpx
+from contextlib import asynccontextmanager
+
+# Import our MCP client and Smart Agent
+from mcp_client import MCPClientManager
+from smart_agent import SmartAgent, get_agent
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Global MCP client manager
+mcp_manager: Optional[MCPClientManager] = None
+
+# Lifespan context manager for startup and shutdown
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    global mcp_manager
+    logger.info("Starting Third-Eye Backend Server...")
+    
+    # Initialize MCP client manager
+    mcp_config_path = os.path.join(os.path.dirname(__file__), "..", "mcp.json")
+    mcp_manager = MCPClientManager(config_path=mcp_config_path)
+    
+    # Load configuration
+    await mcp_manager.load_config()
+    logger.info("MCP configuration loaded")
+    
+    # Note: We don't auto-initialize all servers at startup
+    # Servers will be initialized on-demand or via API call
+    logger.info("MCP manager initialized (servers will connect on-demand)")
+    
+    yield
+    
+    # Shutdown
+    logger.info("Shutting down Third-Eye Backend Server...")
+    if mcp_manager:
+        await mcp_manager.shutdown_all_servers()
+    logger.info("All MCP servers disconnected")
+
 # FastAPI app initialization
 app = FastAPI(
     title="Third-Eye API",
     description="Agentic AI Platform Backend",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # CORS middleware
@@ -59,6 +95,10 @@ class BedrockRequest(BaseModel):
     temperature: float = 0.7
     max_tokens: int = 1000
 
+class PromptRequest(BaseModel):
+    prompt: str
+    auto_execute: bool = True
+
 class AgentConfig(BaseModel):
     name: str
     description: str
@@ -67,30 +107,6 @@ class AgentConfig(BaseModel):
     mcp_connections: List[str]
 
 # In-memory storage (in production, use a proper database)
-mcp_servers: Dict[str, MCPServer] = {
-    "filesystem": MCPServer(
-        id="filesystem",
-        name="Filesystem MCP",
-        endpoint="mcp://filesystem",
-        status="connected",
-        capabilities=["file_read", "file_write", "directory_list"]
-    ),
-    "database": MCPServer(
-        id="database", 
-        name="Database MCP",
-        endpoint="mcp://database",
-        status="connected",
-        capabilities=["sql_query", "schema_inspect"]
-    ),
-    "web_scraper": MCPServer(
-        id="web_scraper",
-        name="Web Scraper MCP", 
-        endpoint="mcp://webscraper",
-        status="connected",
-        capabilities=["html_parse", "data_extract", "url_fetch"]
-    )
-}
-
 agents: Dict[str, Dict] = {}
 conversations: Dict[str, List[ChatMessage]] = {}
 
@@ -114,58 +130,6 @@ class ConnectionManager:
             await connection.send_text(message)
 
 manager = ConnectionManager()
-
-# MCP Server Integration
-class MCPClient:
-    def __init__(self):
-        self.servers = mcp_servers
-        
-    async def call_mcp_server(self, server_id: str, method: str, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Call an MCP server method"""
-        if server_id not in self.servers:
-            raise HTTPException(status_code=404, detail="MCP server not found")
-        
-        server = self.servers[server_id]
-        if server.status != "connected":
-            raise HTTPException(status_code=503, detail="MCP server not available")
-        
-        # Simulate MCP call (in real implementation, use actual MCP protocol)
-        logger.info(f"Calling MCP server {server_id} method {method} with params {params}")
-        
-        # Mock responses based on server type
-        if server_id == "filesystem":
-            return await self._handle_filesystem_call(method, params)
-        elif server_id == "database":
-            return await self._handle_database_call(method, params)
-        elif server_id == "web_scraper":
-            return await self._handle_webscraper_call(method, params)
-        else:
-            return {"result": "success", "data": "Mock response"}
-    
-    async def _handle_filesystem_call(self, method: str, params: Dict) -> Dict:
-        if method == "file_read":
-            return {"result": "success", "content": "File content here...", "size": 1024}
-        elif method == "file_write":
-            return {"result": "success", "bytes_written": 1024}
-        elif method == "directory_list":
-            return {"result": "success", "files": ["file1.txt", "file2.py", "data.json"]}
-        return {"result": "error", "message": "Unknown method"}
-    
-    async def _handle_database_call(self, method: str, params: Dict) -> Dict:
-        if method == "sql_query":
-            return {"result": "success", "rows": [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}]}
-        elif method == "schema_inspect":
-            return {"result": "success", "tables": ["users", "orders", "products"]}
-        return {"result": "error", "message": "Unknown method"}
-    
-    async def _handle_webscraper_call(self, method: str, params: Dict) -> Dict:
-        if method == "url_fetch":
-            return {"result": "success", "html": "<html><body>Sample content</body></html>"}
-        elif method == "data_extract":
-            return {"result": "success", "data": {"title": "Sample Page", "links": ["link1", "link2"]}}
-        return {"result": "error", "message": "Unknown method"}
-
-mcp_client = MCPClient()
 
 # AWS Bedrock Integration
 class BedrockClient:
@@ -247,37 +211,134 @@ async def root():
 
 @app.get("/health")
 async def health_check():
+    connected_servers = 0
+    if mcp_manager:
+        connected_servers = len([s for s in mcp_manager.get_all_servers().values() if s.is_connected])
+    
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "services": {
-            "mcp_servers": len([s for s in mcp_servers.values() if s.status == "connected"]),
-            "bedrock": bedrock_client.client is not None
+            "mcp_servers": connected_servers,
+            "bedrock": bedrock_client.client is not None,
+            "mcp_manager": mcp_manager is not None
         }
     }
 
 # MCP Server endpoints
 @app.get("/api/mcp/servers")
 async def get_mcp_servers():
-    return {"servers": list(mcp_servers.values())}
+    """Get all configured MCP servers with their status"""
+    if not mcp_manager:
+        raise HTTPException(status_code=500, detail="MCP manager not initialized")
+    
+    servers = mcp_manager.get_all_servers_status()
+    return {"servers": servers}
+
+@app.post("/api/mcp/servers/{server_id}/connect")
+async def connect_mcp_server(server_id: str):
+    """Connect to a specific MCP server"""
+    if not mcp_manager:
+        raise HTTPException(status_code=500, detail="MCP manager not initialized")
+    
+    try:
+        success = await mcp_manager.initialize_server(server_id)
+        if success:
+            status = mcp_manager.get_server_status(server_id)
+            return {"success": True, "server": status, "message": f"Connected to {server_id}"}
+        else:
+            raise HTTPException(status_code=500, detail=f"Failed to connect to {server_id}")
+    except Exception as e:
+        logger.error(f"Error connecting to server {server_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/mcp/servers/{server_id}/disconnect")
+async def disconnect_mcp_server(server_id: str):
+    """Disconnect from a specific MCP server"""
+    if not mcp_manager:
+        raise HTTPException(status_code=500, detail="MCP manager not initialized")
+    
+    try:
+        await mcp_manager.shutdown_server(server_id)
+        return {"success": True, "message": f"Disconnected from {server_id}"}
+    except Exception as e:
+        logger.error(f"Error disconnecting from server {server_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/mcp/servers/{server_id}/tools")
+async def list_server_tools(server_id: str):
+    """List all tools available on a specific MCP server"""
+    if not mcp_manager:
+        raise HTTPException(status_code=500, detail="MCP manager not initialized")
+    
+    try:
+        tools = await mcp_manager.list_tools(server_id)
+        return {"server_id": server_id, "tools": tools}
+    except Exception as e:
+        logger.error(f"Error listing tools for server {server_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/mcp/tools")
+async def list_all_tools():
+    """List all tools from all connected MCP servers"""
+    if not mcp_manager:
+        raise HTTPException(status_code=500, detail="MCP manager not initialized")
+    
+    try:
+        all_tools = await mcp_manager.list_all_tools()
+        return {"tools": all_tools}
+    except Exception as e:
+        logger.error(f"Error listing all tools: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/mcp/servers/{server_id}/call")
-async def call_mcp_server(server_id: str, request: Dict[str, Any]):
-    method = request.get("method")
-    params = request.get("params", {})
+async def call_mcp_tool(server_id: str, request: Dict[str, Any]):
+    """Call a tool on a specific MCP server"""
+    if not mcp_manager:
+        raise HTTPException(status_code=500, detail="MCP manager not initialized")
     
-    result = await mcp_client.call_mcp_server(server_id, method, params)
-    return result
+    tool_name = request.get("tool_name")
+    arguments = request.get("arguments", {})
+    
+    if not tool_name:
+        raise HTTPException(status_code=400, detail="tool_name is required")
+    
+    try:
+        result = await mcp_manager.call_tool(server_id, tool_name, arguments)
+        return {"server_id": server_id, "tool_name": tool_name, "result": result}
+    except Exception as e:
+        logger.error(f"Error calling tool {tool_name} on server {server_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/mcp/servers/{server_id}/toggle")
-async def toggle_mcp_server(server_id: str):
-    if server_id not in mcp_servers:
-        raise HTTPException(status_code=404, detail="Server not found")
+@app.get("/api/mcp/servers/{server_id}/resources")
+async def list_server_resources(server_id: str):
+    """List all resources available on a specific MCP server"""
+    if not mcp_manager:
+        raise HTTPException(status_code=500, detail="MCP manager not initialized")
     
-    server = mcp_servers[server_id]
-    server.status = "disconnected" if server.status == "connected" else "connected"
+    try:
+        resources = await mcp_manager.list_resources(server_id)
+        return {"server_id": server_id, "resources": resources}
+    except Exception as e:
+        logger.error(f"Error listing resources for server {server_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/mcp/servers/{server_id}/resources/read")
+async def read_server_resource(server_id: str, request: Dict[str, Any]):
+    """Read a resource from a specific MCP server"""
+    if not mcp_manager:
+        raise HTTPException(status_code=500, detail="MCP manager not initialized")
     
-    return {"server": server, "message": f"Server {server_id} is now {server.status}"}
+    uri = request.get("uri")
+    if not uri:
+        raise HTTPException(status_code=400, detail="uri is required")
+    
+    try:
+        result = await mcp_manager.read_resource(server_id, uri)
+        return {"server_id": server_id, "uri": uri, "result": result}
+    except Exception as e:
+        logger.error(f"Error reading resource {uri} from server {server_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Bedrock endpoints
 @app.post("/api/bedrock/connect")
@@ -391,6 +452,82 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         logger.info(f"Client {client_id} disconnected")
+
+# Smart Agent endpoint - Process prompts intelligently
+@app.post("/api/agent/prompt")
+async def process_prompt(request: PromptRequest):
+    """
+    Process a user prompt and intelligently route to appropriate MCP server
+    
+    This is the main endpoint for frontend integration!
+    """
+    if not mcp_manager:
+        raise HTTPException(status_code=500, detail="MCP manager not initialized")
+    
+    try:
+        # Get or create smart agent
+        agent = get_agent(mcp_manager)
+        
+        # Process the prompt
+        result = await agent.process_prompt(request.prompt)
+        
+        return {
+            "success": result.get('success', False),
+            "prompt": request.prompt,
+            "analysis": result.get('analysis', {}),
+            "action": result.get('action'),
+            "server_id": result.get('server_id'),
+            "tool_name": result.get('tool_name'),
+            "result": result.get('result'),
+            "available_tools": result.get('available_tools'),
+            "error": result.get('error'),
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error processing prompt: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/agent/analyze")
+async def analyze_prompt(request: PromptRequest):
+    """
+    Analyze a prompt without executing (just show which MCP would be used)
+    """
+    if not mcp_manager:
+        raise HTTPException(status_code=500, detail="MCP manager not initialized")
+    
+    try:
+        agent = get_agent(mcp_manager)
+        analysis = agent.analyze_prompt(request.prompt)
+        
+        return {
+            "prompt": request.prompt,
+            "analysis": analysis,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error analyzing prompt: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/agent/chat")
+async def chat_with_agent(request: PromptRequest):
+    """
+    Chat-style interaction with the smart agent (returns human-readable response)
+    """
+    if not mcp_manager:
+        raise HTTPException(status_code=500, detail="MCP manager not initialized")
+    
+    try:
+        agent = get_agent(mcp_manager)
+        response = await agent.chat(request.prompt)
+        
+        return {
+            "prompt": request.prompt,
+            "response": response,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error in chat: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Analytics endpoints
 @app.get("/api/analytics/usage")
