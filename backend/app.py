@@ -632,6 +632,41 @@ async def get_usage_analytics():
         "mcp_calls": 89
     }
 
+# Proxy endpoints to avoid CORS issues
+@app.post("/api/analytics/execute")
+async def proxy_analytics_execute(request: dict):
+    """Proxy analytics requests to external API to avoid CORS issues"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://mighty-bushes-unite.loca.lt/api/analytics/execute",
+                json=request,
+                headers={"Content-Type": "application/json"},
+                timeout=30.0
+            )
+            return response.json()
+            
+    except Exception as e:
+        logger.error(f"Analytics proxy error: {e}")
+        raise HTTPException(status_code=500, detail=f"Analytics API error: {str(e)}")
+
+@app.post("/api/query")
+async def proxy_query(request: dict):
+    """Proxy query requests to external API to avoid CORS issues"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "http://18.207.167.104:8000/query",
+                json=request,
+                headers={"Content-Type": "application/json"},
+                timeout=30.0
+            )
+            return response.json()
+            
+    except Exception as e:
+        logger.error(f"Query proxy error: {e}")
+        raise HTTPException(status_code=500, detail=f"Query API error: {str(e)}")
+
 # Dashboard Test Endpoints
 @app.post("/api/dashboard/test-query")
 async def test_dashboard_query():
