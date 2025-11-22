@@ -46,7 +46,7 @@ interface ApiResponse {
       <!-- Header -->
       <div class="conversations-header" @fadeIn>
         <div class="header-content">
-          <h1>🤖 AI Search & Query Interface</h1>
+            <h1>🤖 Agentic AI Based Lending Funnel Analysis Interface</h1>
           <p>Enter your queries and get intelligent responses from our AI agents</p>
         </div>
         <div class="header-stats">
@@ -68,11 +68,11 @@ interface ApiResponse {
             <h2>🔍 Enter Your Query</h2>
             <div class="search-options">
               <select [(ngModel)]="selectedAgent" name="selectedAgent" class="agent-select">
-                <option value="">Select AI Agent</option>
-                <option value="data-analyst">📊 Data Analyst</option>
-                <option value="code-assistant">💻 Code Assistant</option>
-                <option value="research">🔬 Research Assistant</option>
-                <option value="general">🤖 General AI</option>
+                <option value="">Select AI Model</option>
+                <option value="nova-lite">🌟 Nova Lite</option>
+                <option value="claude-3.5-sonnet">🧠 Claude 3.5 Sonnet</option>
+                <option value="gpt-oss-20b">⚡ gpt-oss-20b</option>
+                <option value="llama-3.1-405b">🦙 Llama 3.1 405B</option>
               </select>
               <div class="selected-agent-indicator" *ngIf="selectedAgent" @scaleIn>
                 <span class="agent-badge">{{ getAgentName(selectedAgent) }} selected</span>
@@ -360,15 +360,15 @@ export class ConversationsComponent implements OnInit {
     });
   }
 
-  getAgentName(agentId: string): string {
-    const agentNames: { [key: string]: string } = {
-      'data-analyst': 'Data Analyst',
-      'code-assistant': 'Code Assistant',
-      'research': 'Research Assistant',
-      'general': 'General AI'
-    };
-    return agentNames[agentId] || 'AI Agent';
-  }
+   getAgentName(agentId: string): string {
+     const agentNames: { [key: string]: string } = {
+       'nova-lite': 'Nova Lite',
+       'claude-3.5-sonnet': 'Claude 3.5 Sonnet',
+       'gpt-oss-20b': 'gpt-oss-20b',
+       'llama-3.1-405b': 'Llama 3.1 405B'
+     };
+     return agentNames[agentId] || 'AI Model';
+   }
 
   private loadQueryHistory() {
     if (typeof window !== 'undefined' && window.localStorage) {
